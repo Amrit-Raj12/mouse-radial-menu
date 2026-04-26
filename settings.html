@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Radial Menu — Shortcuts</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:#0f0f13; color:#e8e8f0;
+  height:100vh; display:flex; flex-direction:column; overflow:hidden;
+}
+
+/* Header */
+header {
+  padding:18px 24px 14px;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  display:flex; align-items:center; justify-content:space-between;
+  background:#151519;
+}
+header h1 { font-size:16px; font-weight:700; letter-spacing:0.3px; }
+header p { font-size:11px; color:#666; margin-top:2px; }
+.add-btn {
+  padding:8px 18px; background:linear-gradient(135deg,#5c6bc0,#3949ab);
+  color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600;
+  cursor:pointer; transition:filter 0.15s, transform 0.1s;
+}
+.add-btn:hover { filter:brightness(1.15); }
+.add-btn:active { transform:scale(0.97); }
+
+/* List */
+#list {
+  flex:1; overflow-y:auto; padding:12px 16px; display:flex;
+  flex-direction:column; gap:8px;
+}
+#list::-webkit-scrollbar { width:6px; }
+#list::-webkit-scrollbar-track { background:transparent; }
+#list::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
+
+.card {
+  background:#1a1a22; border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px; padding:12px 14px;
+  display:grid; grid-template-columns:48px 1fr 1fr 90px 36px;
+  gap:10px; align-items:center;
+  transition:border-color 0.15s, background 0.15s;
+}
+.card:hover { background:#1e1e28; border-color:rgba(255,255,255,0.12); }
+
+.card-preview {
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0; cursor:pointer;
+  border:2px solid rgba(255,255,255,0.15);
+  transition:transform 0.15s;
+  position:relative;
+}
+.card-preview:hover { transform:scale(1.08); }
+.card-preview .edit-overlay {
+  position:absolute; inset:0; border-radius:50%;
+  background:rgba(0,0,0,0.5); display:none;
+  align-items:center; justify-content:center; font-size:14px;
+}
+.card-preview:hover .edit-overlay { display:flex; }
+
+.field-group { display:flex; flex-direction:column; gap:4px; }
+.field-group label { font-size:9px; color:#555; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; }
+
+input, select {
+  background:#0c0c10; border:1px solid rgba(255,255,255,0.1);
+  color:#e0e0ee; border-radius:6px; padding:5px 8px;
+  font-size:12px; width:100%; outline:none;
+  transition:border-color 0.15s;
+}
+input:focus, select:focus { border-color:#5c6bc0; }
+select option { background:#1a1a22; }
+
+.angle-group { display:flex; flex-direction:column; gap:4px; align-items:center; }
+.angle-group label { font-size:9px; color:#555; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; }
+.angle-group select { text-align:center; }
+
+.delete-btn {
+  width:32px; height:32px; border-radius:8px;
+  background:rgba(220,50,50,0.15); border:1px solid rgba(220,50,50,0.2);
+  color:#e05555; font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background 0.15s, color 0.15s;
+}
+.delete-btn:hover { background:rgba(220,50,50,0.35); color:#ff6666; }
+
+/* Footer */
+footer {
+  padding:14px 24px; border-top:1px solid rgba(255,255,255,0.07);
+  display:flex; gap:10px; justify-content:flex-end; background:#151519;
+}
+.save-btn {
+  padding:9px 26px; background:linear-gradient(135deg,#43a047,#2e7d32);
+  color:#fff; border:none; border-radius:8px; font-size:13px;
+  font-weight:700; cursor:pointer; transition:filter 0.15s;
+}
+.save-btn:hover { filter:brightness(1.12); }
+.reset-btn {
+  padding:9px 18px; background:rgba(255,255,255,0.06);
+  color:#aaa; border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px; font-size:13px; cursor:pointer; transition:background 0.15s;
+}
+.reset-btn:hover { background:rgba(255,255,255,0.1); }
+
+.toast {
+  position:fixed; bottom:70px; left:50%; transform:translateX(-50%);
+  background:#2e7d32; color:#fff; padding:8px 20px;
+  border-radius:20px; font-size:12px; font-weight:600;
+  opacity:0; transition:opacity 0.2s; pointer-events:none; z-index:100;
+}
+.toast.show { opacity:1; }
+
+/* Icon/color picker modal */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.7);
+  display:none; align-items:center; justify-content:center; z-index:200;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:#1e1e28; border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px; padding:24px; width:340px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.8);
+}
+.modal h3 { font-size:14px; font-weight:700; margin-bottom:16px; }
+.emoji-grid {
+  display:grid; grid-template-columns:repeat(8,1fr); gap:6px;
+  max-height:200px; overflow-y:auto; margin-bottom:16px;
+}
+.emoji-grid::-webkit-scrollbar { width:4px; }
+.emoji-grid::-webkit-scrollbar-thumb { background:#333; border-radius:2px; }
+.emoji-opt {
+  width:34px; height:34px; border-radius:8px; border:2px solid transparent;
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  cursor:pointer; background:rgba(255,255,255,0.05); transition:all 0.12s;
+}
+.emoji-opt:hover { background:rgba(255,255,255,0.12); transform:scale(1.1); }
+.emoji-opt.selected { border-color:#5c6bc0; background:rgba(92,107,192,0.2); }
+.color-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.color-opt {
+  width:32px; height:32px; border-radius:50%; cursor:pointer;
+  border:2px solid transparent; transition:transform 0.12s, border-color 0.12s;
+}
+.color-opt:hover { transform:scale(1.1); }
+.color-opt.selected { border-color:#fff; }
+.modal-btns { display:flex; gap:8px; justify-content:flex-end; }
+.modal-btns button {
+  padding:7px 18px; border-radius:8px; border:none; cursor:pointer;
+  font-size:12px; font-weight:600;
+}
+.modal-ok { background:#5c6bc0; color:#fff; }
+.modal-cancel { background:rgba(255,255,255,0.08); color:#aaa; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🖱️ Radial Menu Shortcuts</h1>
+    <p>Hold middle mouse button to open the menu</p>
+  </div>
+  <button class="add-btn" onclick="addShortcut()">＋ Add Shortcut</button>
+</header>
+
+<div id="list"></div>
+
+<footer>
+  <button class="reset-btn" onclick="resetDefaults()">Reset Defaults</button>
+  <button class="save-btn" onclick="saveAll()">💾 Save Changes</button>
+</footer>
+
+<div class="toast" id="toast">✓ Saved!</div>
+
+<!-- Icon/Color picker modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Choose Icon & Color</h3>
+    <div class="emoji-grid" id="emoji-grid"></div>
+    <div class="color-row" id="color-row"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-ok" onclick="applyModal()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const { ipcRenderer } = require('electron');
+
+const EMOJIS = [
+  '📁','🗂️','💾','🖥️','🖱️','⌨️','🖨️','📷','📸','🎵','🎶','▶️','⏸️','⏭️','⏮️','🔊',
+  '🔇','📝','✏️','📋','📌','📍','🔍','🔎','⚙️','🔧','🔨','🛠️','🗑️','🔒','🔓','🔑',
+  '🌐','🔗','📧','📨','📩','📬','🗓️','📅','⏰','⏱️','🕐','🧮','📊','📈','📉','💹',
+  '✨','⭐','🌟','💫','🔥','❤️','💙','💚','💛','💜','🧡','🤍','🎯','🎮','🎲','🎨',
+  '🚀','🛸','🌙','☀️','🌈','⚡','💧','🌊','🍎','☕','🧠','👁️','👋','✅','❌','⚠️',
+];
+
+const GRADIENTS = [
+  'linear-gradient(135deg,#1a73e8,#0d47a1)',
+  'linear-gradient(135deg,#43a047,#1b5e20)',
+  'linear-gradient(135deg,#fb8c00,#e65100)',
+  'linear-gradient(135deg,#8e24aa,#4a148c)',
+  'linear-gradient(135deg,#00acc1,#006064)',
+  'linear-gradient(135deg,#e53935,#b71c1c)',
+  'linear-gradient(135deg,#f4c430,#f57f17)',
+  'linear-gradient(135deg,#546e7a,#263238)',
+  'linear-gradient(135deg,#00897b,#004d40)',
+  'linear-gradient(135deg,#d81b60,#880e4f)',
+  'linear-gradient(135deg,#6d4c41,#3e2723)',
+  'linear-gradient(135deg,#5e35b1,#311b92)',
+  'linear-gradient(135deg,#039be5,#01579b)',
+  'linear-gradient(135deg,#c0ca33,#827717)',
+  'linear-gradient(135deg,#ff7043,#bf360c)',
+  'linear-gradient(135deg,#ec407a,#880e4f)',
+];
+
+const ANGLES = [
+  {label:'Top (12 o\'clock)',    value:0},
+  {label:'Top-Right (1-2 o\'c)', value:45},
+  {label:'Right (3 o\'clock)',   value:90},
+  {label:'Bottom-Right (4-5)',   value:135},
+  {label:'Bottom (6 o\'clock)',  value:180},
+  {label:'Bottom-Left (7-8)',    value:225},
+  {label:'Left (9 o\'clock)',    value:270},
+  {label:'Top-Left (10-11)',     value:315},
+];
+
+const TYPES = [
+  {value:'app',      label:'App / EXE'},
+  {value:'url',      label:'Website URL'},
+  {value:'folder',   label:'Open Folder'},
+  {value:'shortcut', label:'Key Shortcut'},
+  {value:'settings', label:'Windows Settings'},
+  {value:'media',    label:'Media Control'},
+];
+
+const TYPE_PLACEHOLDERS = {
+  app:      'e.g. notepad.exe  or  C:\\path\\app.exe',
+  url:      'e.g. https://claude.ai',
+  folder:   'e.g. C:\\Users\\You\\Documents',
+  shortcut: 'e.g. win+shift+s  or  ctrl+c',
+  settings: 'e.g. ms-settings:display  or  control main.cpl',
+  media:    '(no value needed — plays/pauses media)',
+};
+
+let shortcuts = [];
+let modalTarget = null;
+let modalSelectedEmoji = '';
+let modalSelectedGrad = '';
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function init() {
+  shortcuts = await ipcRenderer.invoke('get-shortcuts');
+  renderList();
+  buildModal();
+}
+
+function renderList() {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  shortcuts.forEach((sc, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-preview" style="background:${sc.bg}" onclick="openModal(${i})">
+        ${sc.icon}
+        <div class="edit-overlay">✏️</div>
+      </div>
+      <div class="field-group">
+        <label>Label</label>
+        <input type="text" value="${sc.label}" maxlength="14"
+          oninput="shortcuts[${i}].label=this.value"/>
+      </div>
+      <div class="field-group">
+        <label>Type &amp; Value</label>
+        <div style="display:flex;gap:5px;margin-bottom:4px">
+          <select style="width:130px;flex-shrink:0" onchange="onTypeChange(${i},this.value)">
+            ${TYPES.map(t=>`<option value="${t.value}"${sc.type===t.value?' selected':''}>${t.label}</option>`).join('')}
+          </select>
+          <input type="text" value="${sc.value||''}"
+            placeholder="${TYPE_PLACEHOLDERS[sc.type]||''}"
+            ${sc.type==='media'?'disabled':''} style="flex:1"
+            oninput="shortcuts[${i}].value=this.value"/>
+        </div>
+      </div>
+      <div class="angle-group">
+        <label>Position</label>
+        <select onchange="shortcuts[${i}].angle=parseInt(this.value)">
+          ${ANGLES.map(a=>`<option value="${a.value}"${sc.angle===a.value?' selected':''}>${a.label}</option>`).join('')}
+        </select>
+      </div>
+      <button class="delete-btn" onclick="deleteShortcut(${i})">✕</button>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function onTypeChange(i, type) {
+  shortcuts[i].type = type;
+  if (type === 'media') shortcuts[i].value = 'play-pause';
+  renderList();
+}
+
+// ── Add / Delete ──────────────────────────────────────────────────────────────
+function addShortcut() {
+  const usedAngles = new Set(shortcuts.map(s => s.angle));
+  const freeAngle = ANGLES.find(a => !usedAngles.has(a.value));
+  shortcuts.push({
+    id: 'custom-' + Date.now(),
+    label: 'New',
+    icon: '⭐',
+    angle: freeAngle ? freeAngle.value : 0,
+    bg: GRADIENTS[shortcuts.length % GRADIENTS.length],
+    type: 'app',
+    value: '',
+  });
+  renderList();
+  document.getElementById('list').lastElementChild?.scrollIntoView({behavior:'smooth'});
+}
+
+function deleteShortcut(i) {
+  shortcuts.splice(i, 1);
+  renderList();
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveAll() {
+  await ipcRenderer.invoke('save-shortcuts', shortcuts);
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+async function resetDefaults() {
+  if (!confirm('Reset to default shortcuts?')) return;
+  const def = await ipcRenderer.invoke('get-shortcuts'); // triggers reload from file
+  shortcuts = JSON.parse(JSON.stringify(def));
+  // Actually reset to hardcoded defaults via main
+  ipcRenderer.invoke('save-shortcuts', null).then(() => init());
+}
+
+// ── Icon/Color modal ──────────────────────────────────────────────────────────
+function buildModal() {
+  const emojiGrid = document.getElementById('emoji-grid');
+  EMOJIS.forEach(e => {
+    const el = document.createElement('div');
+    el.className = 'emoji-opt';
+    el.textContent = e;
+    el.onclick = () => {
+      document.querySelectorAll('.emoji-opt').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      modalSelectedEmoji = e;
+    };
+    emojiGrid.appendChild(el);
+  });
+
+  const colorRow = document.getElementById('color-row');
+  GRADIENTS.forEach(g => {
+    const el = document.createElement('div');
+    el.className = 'color-opt';
+    el.style.background = g;
+    el.onclick = () => {
+      document.querySelectorAll('.color-opt').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      modalSelectedGrad = g;
+    };
+    colorRow.appendChild(el);
+  });
+}
+
+function openModal(i) {
+  modalTarget = i;
+  modalSelectedEmoji = shortcuts[i].icon;
+  modalSelectedGrad = shortcuts[i].bg;
+  document.querySelectorAll('.emoji-opt').forEach(el => {
+    el.classList.toggle('selected', el.textContent === modalSelectedEmoji);
+  });
+  document.querySelectorAll('.color-opt').forEach(el => {
+    el.classList.toggle('selected', el.style.background === modalSelectedGrad);
+  });
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function applyModal() {
+  if (modalTarget !== null) {
+    if (modalSelectedEmoji) shortcuts[modalTarget].icon = modalSelectedEmoji;
+    if (modalSelectedGrad) shortcuts[modalTarget].bg = modalSelectedGrad;
+    renderList();
+  }
+  closeModal();
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "name": "mouse-radial-menu",
+  "version": "1.0.0",
+  "description": "Middle mouse button radial menu for Windows",
+  "author": "Your Name",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win portable",
+    "build-installer": "set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.youname.radial-menu",
+    "productName": "RadialMenu",
+    "copyright": "Copyright © 2026",
+    "asar": true,
+    "compression": "maximum",
+    "win": {
+      "target": [
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "portable": {
+      "artifactName": "RadialMenu-Portable.exe",
+      "requestExecutionLevel": "admin"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "settings.html",
+      "preload.js",
+      "icon.ico",
+      "icon.png",
+      "package.json"
+    ],
+    "removePackageScripts": true
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}

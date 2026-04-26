@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Electron builder cache
+.cache/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temp files
+*.tmp
+*.temp
+
+# IDE / Editor
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Environment
+.env
+.env.local
+
+# Electron builder generated
+dist/builder-debug.yml
+dist/builder-effective-config.yaml
