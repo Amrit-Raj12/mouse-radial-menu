@@ -113,6 +113,16 @@ footer {
 }
 .toast.show { opacity:1; }
 
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:#1a1a22; border-radius:10px; border:1px solid rgba(255,255,255,0.07); margin-bottom:10px; }
+.toggle-row:hover { border-color:rgba(255,255,255,0.12); }
+.toggle-info { display:flex; flex-direction:column; gap:2px; }
+.toggle-label { font-size:13px; font-weight:600; color:#e0e0ee; }
+.toggle-desc { font-size:11px; color:#666; }
+.toggle-switch { width:44px; height:24px; background:#333; border-radius:12px; position:relative; cursor:pointer; transition:background 0.2s; }
+.toggle-switch.on { background:#43a047; }
+.toggle-switch::after { content:''; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:3px; left:3px; transition:transform 0.2s; }
+.toggle-switch.on::after { transform:translateX(20px); }
+
 /* Icon/color picker modal */
 .modal-overlay {
   position:fixed; inset:0; background:rgba(0,0,0,0.7);
@@ -166,6 +176,14 @@ footer {
     <button class="add-btn" onclick="addShortcut()">＋ Add Shortcut</button>
   </div>
 </header>
+
+<div class="toggle-row" onclick="toggleAutoStart()">
+  <div class="toggle-info">
+    <span class="toggle-label">🚀 Start on Windows Boot</span>
+    <span class="toggle-desc">Launch automatically when you log in</span>
+  </div>
+  <div class="toggle-switch" id="auto-start-toggle"></div>
+</div>
 
 <div id="list"></div>
 
@@ -258,10 +276,20 @@ async function init() {
   shortcuts = await ipcRenderer.invoke('get-shortcuts');
   renderList();
   buildModal();
+  const autoStart = await ipcRenderer.invoke('get-auto-start');
+  document.getElementById('auto-start-toggle').classList.toggle('on', autoStart);
 }
 
 function openRadialMenu() {
   ipcRenderer.send('show-menu-from-settings');
+}
+
+async function toggleAutoStart() {
+  const toggle = document.getElementById('auto-start-toggle');
+  const isOn = toggle.classList.contains('on');
+  const newState = !isOn;
+  toggle.classList.toggle('on', newState);
+  ipcRenderer.send('set-auto-start', newState);
 }
 
 function renderList() {

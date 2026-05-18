@@ -149,6 +149,14 @@ ipcMain.on('show-menu-from-settings', () => {
   }
 });
 
+ipcMain.handle('get-auto-start', () => {
+  return app.getLoginItemSettings().openAtLogin;
+});
+
+ipcMain.on('set-auto-start', (_e, enabled) => {
+  app.setLoginItemSettings({ openAtLogin: enabled });
+});
+
 // ── Actions ───────────────────────────────────────────────────────────────────
 function performAction(sc) {
   switch(sc.type) {
