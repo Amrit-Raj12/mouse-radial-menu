@@ -85,9 +85,6 @@ function createMenuWindow() {
   });
   menuWindow.loadFile(path.join(__dirname, 'index.html'));
   menuWindow.setAlwaysOnTop(true, 'screen-saver');
-  menuWindow.on('blur', () => {
-    setTimeout(() => { if (isMenuVisible) hideMenu(); }, 150);
-  });
 }
 
 // ── Settings window ───────────────────────────────────────────────────────────
@@ -145,6 +142,12 @@ ipcMain.on('execute-action', (_e, shortcut) => {
 ipcMain.handle('get-shortcuts', () => loadConfig());
 ipcMain.handle('save-shortcuts', (_e, shortcuts) => { saveConfig(shortcuts); return true; });
 ipcMain.on('open-settings', () => openSettingsWindow());
+ipcMain.on('show-menu-from-settings', () => {
+  if (settingsWindow) {
+    const [x, y] = [settingsWindow.getPosition()[0] + 100, settingsWindow.getPosition()[1] + 100];
+    showMenu(x, y);
+  }
+});
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 function performAction(sc) {
@@ -186,11 +189,14 @@ function startMouseWatcher() {
     '  public static POINT Pos() { POINT p; GetCursorPos(out p); return p; }',
     '}',
     '"@',
-    '$held=$false; $ticks=0; $TRIGGER=4',
+    '$lastClick=0; $doubleClickGap=300',
     'while($true){',
-    '  $d=[RMouse]::Mid()',
-    '  if($d){ $ticks++; if($ticks -eq $TRIGGER -and -not $held){ $p=[RMouse]::Pos(); [Console]::WriteLine("SHOW:"+$p.X+":"+$p.Y); [Console]::Out.Flush(); $held=$true } }',
-    '  else{ $ticks=0; $held=$false }',
+    '  if([RMouse]::Mid()){',
+    '    $now=[DateTime]::Now.Ticks',
+    '    if($now - $lastClick -le $doubleClickGap*10000){ $p=[RMouse]::Pos(); [Console]::WriteLine("SHOW:"+$p.X+":"+$p.Y); [Console]::Out.Flush(); $lastClick=0 }',
+    '    else{ $lastClick=$now }',
+    '    Start-Sleep -Milliseconds 150',
+    '  }',
     '  Start-Sleep -Milliseconds 25',
     '}',
   ].join('\r\n');
