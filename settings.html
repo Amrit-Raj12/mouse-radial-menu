@@ -161,7 +161,10 @@ footer {
     <h1>🖱️ Radial Menu Shortcuts</h1>
     <p>Hold middle mouse button to open the menu</p>
   </div>
-  <button class="add-btn" onclick="addShortcut()">＋ Add Shortcut</button>
+  <div style="display:flex;gap:10px">
+    <button class="add-btn" onclick="openRadialMenu()" style="background:linear-gradient(135deg,#2e7d32,#1b5e20)">▶️ Run Menu</button>
+    <button class="add-btn" onclick="addShortcut()">＋ Add Shortcut</button>
+  </div>
 </header>
 
 <div id="list"></div>
@@ -255,6 +258,10 @@ async function init() {
   shortcuts = await ipcRenderer.invoke('get-shortcuts');
   renderList();
   buildModal();
+}
+
+function openRadialMenu() {
+  ipcRenderer.send('show-menu-from-settings');
 }
 
 function renderList() {
